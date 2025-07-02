@@ -39,7 +39,21 @@ const navItems: NavItem[] = [
     path: 'authentication',
     icon: 'tabler:shopping-bag',
     active: true,
-    collapsible: false,
+    collapsible: true,
+    sublist: [
+      {
+         title: 'Add Admin',
+        path: 'applications',
+        active: true,
+        collapsible: false,
+      },
+      {
+      title: 'Edit Admin',
+        path: 'applications',
+        active: true,
+        collapsible: false,
+      },
+    ],
   },
   
    
