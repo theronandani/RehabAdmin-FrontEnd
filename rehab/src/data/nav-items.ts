@@ -27,10 +27,18 @@ const navItems: NavItem[] = [
   },
     {
     title: 'View Applications',
-    path: '#!',
+    path: 'authentication',
     icon: 'mingcute:grid-fill',
     active: true,
-    collapsible: false,
+    collapsible: true,
+        sublist: [
+      {
+         title: 'Applications',
+        path: 'applicationmanagement',
+        active: true,
+        collapsible: false,
+      },
+    ],
 
   },
 
@@ -43,13 +51,7 @@ const navItems: NavItem[] = [
     sublist: [
       {
          title: 'Add Admin',
-        path: 'applications',
-        active: true,
-        collapsible: false,
-      },
-      {
-      title: 'Edit Admin',
-        path: 'applications',
+        path: 'addrehabadmin',
         active: true,
         collapsible: false,
       },
@@ -58,11 +60,19 @@ const navItems: NavItem[] = [
   
    
   {
-    title: 'Notification',
-    path: '#!',
+    title: 'Client Progress',
+    path: 'authentication',
     icon: 'zondicons:notifications',
-    active: false,
-    collapsible: false,
+    active: true,
+    collapsible: true,
+    sublist: [
+      {
+         title: 'Add Progress',
+        path: 'clientprogress',
+        active: true,
+        collapsible: false,
+      },
+    ],
   },
   {
     title: 'Message',
@@ -70,6 +80,7 @@ const navItems: NavItem[] = [
     icon: 'ph:chat-circle-dots-fill',
     active: false,
     collapsible: false,
+    
   },
 ];
 

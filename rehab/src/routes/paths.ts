@@ -19,5 +19,9 @@ export default {
   resetPassword: `/${rootPaths.authRoot}/reset-password`,
   forgotPassword: `/${rootPaths.authRoot}/forgot-password`,
 
+  applicationmanagement: `/${rootPaths.authRoot}/applicationmanagement`,
+  addrehabadmin : `/${rootPaths.authRoot}/addrehabadmin`,
+  clientprogress: `/${rootPaths.authRoot}/clientprogress`,
+
   404: `/${rootPaths.errorRoot}/404`,
 };

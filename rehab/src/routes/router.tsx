@@ -5,6 +5,9 @@ import paths, { rootPaths } from './paths';
 
 import PageLoader from '../components/loading/PageLoader';
 import Splash from 'components/loading/Splash';
+import ApplicationManagement from 'pages/authentication/ApplicationManagement';
+import AddRehabAdmin from 'pages/authentication/AddRehebAdmin';
+import ClientProgress from 'pages/authentication/ClientProgress';
 
 const App = lazy(() => import('App'));
 const MainLayout = lazy(async () => {
@@ -98,6 +101,18 @@ const routes: RouteObject[] = [
           {
             path: paths.addclient,
             element: <AddClient />,
+          },
+          {
+            path: paths.applicationmanagement,
+            element: <ApplicationManagement/>,
+          },
+          {
+            path: paths.addrehabadmin,
+            element: <AddRehabAdmin/>,
+          },
+          {
+            path: paths.clientprogress,
+            element: <ClientProgress/>,
           },
         ],
       },
