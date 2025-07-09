@@ -22,6 +22,9 @@ export default {
   applicationmanagement: `/${rootPaths.authRoot}/applicationmanagement`,
   addrehabadmin : `/${rootPaths.authRoot}/addrehabadmin`,
   clientprogress: `/${rootPaths.authRoot}/clientprogress`,
+  roomallocation: `/${rootPaths.authRoot}/roomallocation/:id`, // dynamic route
+  dashboard: `/${rootPaths.authRoot}/dashboard`,
+  userprofile: `/${rootPaths.authRoot}/userprofile`,
 
   404: `/${rootPaths.errorRoot}/404`,
 };

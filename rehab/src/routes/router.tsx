@@ -8,6 +8,9 @@ import Splash from 'components/loading/Splash';
 import ApplicationManagement from 'pages/authentication/ApplicationManagement';
 import AddRehabAdmin from 'pages/authentication/AddRehebAdmin';
 import ClientProgress from 'pages/authentication/ClientProgress';
+import RoomAllocation from 'pages/authentication/RoomAllocation';
+import Dashboard from 'pages/authentication/Dashboard';
+import UserProfile from 'pages/authentication/UserProfile';
 
 const App = lazy(() => import('App'));
 const MainLayout = lazy(async () => {
@@ -42,7 +45,6 @@ const ResetPassword = lazy(async () => import('pages/authentication/ResetPasswor
 const ForgotPassword = lazy(async () => import('pages/authentication/ForgotPassword'));
 
 const AddSocialWorker = lazy(async () => import('pages/authentication/AddSocialWorker'));
-const AddClient = lazy(async () => import('pages/authentication/AddClient')); 
 
 const routes: RouteObject[] = [
   {
@@ -99,10 +101,6 @@ const routes: RouteObject[] = [
             element: <AddSocialWorker />,
           },
           {
-            path: paths.addclient,
-            element: <AddClient />,
-          },
-          {
             path: paths.applicationmanagement,
             element: <ApplicationManagement/>,
           },
@@ -113,6 +111,18 @@ const routes: RouteObject[] = [
           {
             path: paths.clientprogress,
             element: <ClientProgress/>,
+          },
+          {
+            path: paths.roomallocation,
+            element: <RoomAllocation/>,
+          },
+          {
+            path: paths.dashboard,
+            element: <Dashboard/>,
+          },
+          {
+            path: paths.userprofile,
+            element: <UserProfile/>,
           },
         ],
       },

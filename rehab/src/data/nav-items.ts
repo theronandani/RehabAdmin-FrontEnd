@@ -19,10 +19,18 @@ const navItems: NavItem[] = [
 
   {
     title: 'Dashboard',
-    path: '#!',
+    path: 'authentication',
     icon: 'icomoon-free:drawer',
     active: true,
-    collapsible: false,
+    collapsible: true,
+    sublist: [
+      {
+         title: 'Stats',
+        path: 'dashboard',
+        active: true,
+        collapsible: false,
+      },
+    ],
 
   },
     {
@@ -75,11 +83,19 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    title: 'Message',
-    path: '#!',
-    icon: 'ph:chat-circle-dots-fill',
-    active: false,
-    collapsible: false,
+    title: 'User Profile',
+    path: 'authentication',
+    icon: 'ph:user-circle-fill',
+    active: true,
+    collapsible: true,
+    sublist: [
+      {
+         title: 'Profile',
+        path: 'userprofile',
+        active: true,
+        collapsible: false,
+      },
+    ],
     
   },
 ];

@@ -1,4 +1,6 @@
-import { useState } from 'react';
+/* ApplicationManagement.tsx */
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -14,15 +16,8 @@ import {
   Link,
   Snackbar,
   Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
 } from '@mui/material';
+import paths from 'routes/paths';
 
 type ApplicationStatus = 'Pending' | 'Approved' | 'Rejected';
 
@@ -39,19 +34,8 @@ interface Application {
   substances: string[];
 }
 
-interface House {
-  id: string;
-  name: string;
-  rooms: Room[];
-}
-
-interface Room {
-  id: string;
-  name: string;
-  available: boolean;
-}
-
-const dummyApplications: Application[] = [
+// initial list
+const initialApplications: Application[] = [
   {
     id: 'APP-001',
     socialWorker: 'Jonath Barren',
@@ -64,79 +48,54 @@ const dummyApplications: Application[] = [
     submittedDocs: ['Medical_Report.pdf', 'ID_Copy.jpg'],
     substances: ['Alcohol', 'Opioids'],
   },
-];
-
-const housesData: House[] = [
-  {
-    id: 'house1',
-    name: 'House A',
-    rooms: [
-      { id: 'r1', name: 'Room 1', available: true },
-      { id: 'r2', name: 'Room 2', available: false },
-      { id: 'r3', name: 'Room 3', available: true },
-    ],
-  },
-  {
-    id: 'house2',
-    name: 'House B',
-    rooms: [
-      { id: 'r4', name: 'Room 1', available: true },
-      { id: 'r5', name: 'Room 2', available: true },
-    ],
-  },
+  // …other items
 ];
 
 export default function ApplicationManagement() {
+  const [applications, setApplications] = useState<Application[]>(initialApplications);
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
-  const [decision, setDecision] = useState<'accept' | 'decline' | null>(null);
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [roomDialogOpen, setRoomDialogOpen] = useState(false);
-  const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
-  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string }>({
+    open: false,
+    message: '',
+  });
 
-  const handleCloseSnackbar = (
-    event?: React.SyntheticEvent | Event,
-    reason?: string
-  ) => {
-    if (reason === 'clickaway') return;
-    setOpenSnackbar(false);
-  };
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleAssignRoom = () => {
-    setRoomDialogOpen(true);
-  };
-
-  const handleRoomSave = () => {
-    setRoomDialogOpen(false);
-    setSnackbarMessage(
-      `Room "${selectedRoom?.name}" in "${selectedHouse?.name}" assigned successfully.`
-    );
-    setOpenSnackbar(true);
-  };
-
-  const handleSubmit = () => {
-    if (decision === 'accept' && !selectedRoom) {
-      setSnackbarMessage('Please assign a room before submitting.');
-      setOpenSnackbar(true);
-      return;
-    }
-
-    if (selectedApp) {
-      setSnackbarMessage(
-        decision
-          ? `Application for ${selectedApp.clientName} ${
-              decision === 'accept' ? 'accepted' : 'declined'
-            } successfully.`
-          : `No decision made for ${selectedApp.clientName}.`
+  // Pick up approvedId when redirected back
+  useEffect(() => {
+    const state = (location.state as { approvedId?: string }) || {};
+    if (state.approvedId) {
+      setApplications((apps) =>
+        apps.map((app) =>
+          app.id === state.approvedId ? { ...app, status: 'Approved' } : app
+        )
       );
-      setOpenSnackbar(true);
+      setSnackbar({ open: true, message: `Application ${state.approvedId} approved.` });
+      // clear so it won’t re-trigger on re-render
+      navigate(location.pathname, { replace: true, state: {} });
     }
+  }, [location.state, navigate, location.pathname]);
 
-    // Reset after submission
-    setDecision(null);
-    setSelectedRoom(null);
-    setSelectedHouse(null);
+  const handleCloseSnackbar = () => setSnackbar({ open: false, message: '' });
+
+  const handleAccept = () => {
+    if (selectedApp) {
+      navigate(
+        paths.roomallocation.replace(':id', selectedApp.id)
+      );
+    }
+  };
+
+  const handleDecline = () => {
+    if (selectedApp) {
+      setApplications((apps) =>
+        apps.map((app) =>
+          app.id === selectedApp.id ? { ...app, status: 'Rejected' } : app
+        )
+      );
+      setSnackbar({ open: true, message: `Application ${selectedApp.id} declined.` });
+    }
   };
 
   return (
@@ -145,42 +104,12 @@ export default function ApplicationManagement() {
         Application Management
       </Typography>
 
-      {!selectedApp ? (
-        <Paper>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Application No.</TableCell>
-                <TableCell>Social Worker</TableCell>
-                <TableCell>Client Name</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {dummyApplications.map((app) => (
-                <TableRow key={app.id}>
-                  <TableCell>{app.id}</TableCell>
-                  <TableCell>{app.socialWorker}</TableCell>
-                  <TableCell>{app.clientName}</TableCell>
-                  <TableCell>{app.status}</TableCell>
-                  <TableCell>
-                    <Button variant="contained" onClick={() => setSelectedApp(app)}>
-                      View
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Paper>
-      ) : (
+      {selectedApp ? (
         <>
-          <Typography variant="h5" align="center" mt={4}>
-            Application Details - {selectedApp.clientName}
+          <Typography variant="h5" align="center" mb={2}>
+            Application Details – {selectedApp.clientName}
           </Typography>
-
-          <Grid container spacing={3} mt={2}>
+          <Grid container spacing={3} mb={4}>
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
@@ -205,24 +134,19 @@ export default function ApplicationManagement() {
               <TextField
                 fullWidth
                 label="Substance Type"
-                value={selectedApp.substances?.join(', ') || ''}
+                value={selectedApp.substances.join(', ')}
                 InputProps={{ readOnly: true }}
                 sx={{ mt: 2 }}
               />
               <Typography sx={{ mt: 2 }}>
                 <strong>Submitted Documents:</strong>
               </Typography>
-              {selectedApp.submittedDocs?.length ? (
-                selectedApp.submittedDocs.map((doc, i) => (
-                  <Link key={i} href={`/documents/${doc}`} download>
-                    📄 {doc}
-                  </Link>
-                ))
-              ) : (
-                <Typography>No documents submitted.</Typography>
-              )}
+              {selectedApp.submittedDocs.map((doc, i) => (
+                <Link key={i} href={`/documents/${doc}`} download display="block">
+                  📄 {doc}
+                </Link>
+              ))}
             </Grid>
-
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
@@ -232,17 +156,7 @@ export default function ApplicationManagement() {
                 rows={6}
                 InputProps={{ readOnly: true }}
               />
-              <TextField
-                fullWidth
-                label="Additional Comments"
-                value="No comments added"
-                multiline
-                rows={4}
-                InputProps={{ readOnly: true }}
-                sx={{ mt: 2 }}
-              />
             </Grid>
-
             <Grid item xs={12} md={4}>
               <Box border={1} borderColor="grey.300" p={2} borderRadius={2}>
                 <Typography variant="subtitle2" mb={1}>
@@ -258,124 +172,62 @@ export default function ApplicationManagement() {
                   [Document Preview Here]
                 </Box>
               </Box>
-              <TextField
-                fullWidth
-                label="Admin Comments"
-                placeholder="Write your comment here..."
-                multiline
-                rows={4}
-                sx={{ mt: 2 }}
-              />
             </Grid>
           </Grid>
 
-          <Box display="flex" justifyContent="center" gap={2} mt={4}>
-            <Button
-              variant={decision === 'accept' ? 'contained' : 'outlined'}
-              color="success"
-              onClick={() => setDecision('accept')}
-              sx={{
-                backgroundColor: decision === 'accept' ? 'green' : undefined,
-                '&:hover': {
-                  backgroundColor: decision === 'accept' ? '#006400' : undefined,
-                },
-              }}
-            >
+          <Box display="flex" justifyContent="center" gap={2} mb={2}>
+            <Button variant="contained" color="success" onClick={handleAccept}>
               Accept
             </Button>
-            <Button
-              variant={decision === 'decline' ? 'contained' : 'outlined'}
-              color="error"
-              onClick={() => setDecision('decline')}
-            >
+            <Button variant="contained" color="error" onClick={handleDecline}>
               Decline
             </Button>
-
-            {decision === 'accept' && (
-              <Button variant="contained" onClick={handleAssignRoom}>
-                Assign Room
-              </Button>
-            )}
-
-            {decision && (
-              <Button variant="contained" color="primary" onClick={handleSubmit}>
-                Submit Changes
-              </Button>
-            )}
-          </Box>
-
-          <Box textAlign="center" mt={4}>
             <Button variant="outlined" onClick={() => setSelectedApp(null)}>
-              Back to Application List
+              Back to List
             </Button>
           </Box>
         </>
+      ) : (
+        <Paper>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Application No.</TableCell>
+                <TableCell>Social Worker</TableCell>
+                <TableCell>Client Name</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Action</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {applications.map((app) => (
+                <TableRow key={app.id}>
+                  <TableCell>{app.id}</TableCell>
+                  <TableCell>{app.socialWorker}</TableCell>
+                  <TableCell>{app.clientName}</TableCell>
+                  <TableCell>{app.status}</TableCell>
+                  <TableCell>
+                    <Button variant="contained" onClick={() => setSelectedApp(app)}>
+                      View
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Paper>
       )}
 
-      {/* Snackbar */}
       <Snackbar
-        open={openSnackbar}
+        open={snackbar.open}
         autoHideDuration={3000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbarMessage.includes('assign') ? 'error' : 'success'}
-          sx={{ width: '100%' }}
-        >
-          {snackbarMessage}
+        <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+          {snackbar.message}
         </Alert>
       </Snackbar>
-
-      {/* Assign Room Dialog */}
-      <Dialog open={roomDialogOpen} onClose={() => setRoomDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Assign Room</DialogTitle>
-        <DialogContent>
-          {!selectedHouse ? (
-            <>
-              <Typography>Select a House</Typography>
-              <List>
-                {housesData.map((house) => (
-                  <ListItem disablePadding key={house.id}>
-                    <ListItemButton onClick={() => setSelectedHouse(house)}>
-                      <ListItemText primary={house.name} />
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-              </List>
-            </>
-          ) : (
-            <>
-              <Typography>Rooms in {selectedHouse.name}</Typography>
-              <List>
-                {selectedHouse.rooms
-                  .filter((room) => room.available)
-                  .map((room) => (
-                    <ListItem disablePadding key={room.id}>
-                      <ListItemButton onClick={() => setSelectedRoom(room)}>
-                        <ListItemText
-                          primary={room.name}
-                          secondary={selectedRoom?.id === room.id ? 'Selected' : ''}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  ))}
-              </List>
-            </>
-          )}
-        </DialogContent>
-        <DialogActions>
-          {selectedHouse && (
-            <Button onClick={() => setSelectedHouse(null)}>Back</Button>
-          )}
-          {selectedRoom && (
-            <Button variant="contained" onClick={handleRoomSave}>
-              Save Assignment
-            </Button>
-          )}
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 }
